@@ -1,43 +1,149 @@
-const express = require("express");
-const cors = require("cors");
-const { v4: uuid } = require("uuid");
+/*import express from "express";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
+/*const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+let locations = {};
+let activeUsers = new Set();
+
+/* MIDDLEWARE 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "../frontend")));
 
-const links = {};      // token -> true
-const locations = {};  // token -> {lat,lng,time}
+/* TRACK PAGE 
+app.get("/track", (req,res)=>{
+  res.sendFile(path.join(__dirname,"../frontend/google_map.html"));
+});
 
-// Create tracking link
-app.post("/create-link", (req, res) => {
-  const token = uuid();
-  links[token] = true;
+/* ADMIN PAGE 
+app.get("/admin", (req,res)=>{
+  res.sendFile(path.join(__dirname,"../frontend/admin.html"));
+});
 
+/* RECEIVE LOCATION 
+app.post("/send-location",(req,res)=>{
+  const { token, lat, lng, acc } = req.body;
+  if(!token) return res.sendStatus(400);
+
+  locations[token] = {
+    lat,lng,acc,
+    time: Date.now()
+  };
+  activeUsers.add(token);
+
+  console.log("📍 Location:",token,lat,lng,acc);
+  res.sendStatus(200);
+});
+
+/* ADMIN FETCH 
+app.get("/admin-data",(req,res)=>{
   res.json({
-    token,
-    link: `https://your-frontend.netlify.app/track.html?token=${token}`
+    users:[...activeUsers],
+    locations
   });
 });
 
-// Receive user location
-app.post("/send-location", (req, res) => {
-  const { token, lat, lng } = req.body;
+/* CLEAN DISCONNECTED USERS 
+setInterval(()=>{
+  const now = Date.now();
+  for(const t in locations){
+    if(now - locations[t].time > 60000){
+      delete locations[t];
+      activeUsers.delete(t);
+    }
+  }
+},15000);
 
-  if (!token || !lat || !lng) return res.status(400).json({ error: "Missing data" });
-  if (!links[token]) return res.status(403).json({ error: "Invalid token" });
-
-  locations[token] = { lat, lng, time: Date.now() };
-  console.log("📍 Location received:", token, lat, lng);
-
-  res.json({ success: true });
+app.listen(PORT,()=>{
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+});
+app.post("/create-link",(req,res)=>{
+  const token = Math.random().toString(36).slice(2,10);
+  res.json({ link:`/track?token=${token}` });
 });
 
-// Admin fetch all locations
+app.get("/get-all-locations",(req,res)=>{
+  res.json(locations);
+});
+*/
+import express from "express";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+let locations = {};
+let activeUsers = new Set();
+
+/* MIDDLEWARE */
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+/* TRACK PAGE */
+app.get("/track", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/google_map.html"));
+});
+
+/* ADMIN PAGE */
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/admin.html"));
+});
+
+/* CREATE TRACK LINK */
+app.post("/create-link", (req, res) => {
+  const token = Math.random().toString(36).slice(2, 10);
+  res.json({ link: `/track?token=${token}` });
+});
+
+/* RECEIVE LOCATION */
+app.post("/send-location", (req, res) => {
+  const { token, lat, lng, acc } = req.body;
+  if (!token) return res.sendStatus(400);
+
+  locations[token] = {
+    lat,
+    lng,
+    acc,
+    time: Date.now()
+  };
+
+  activeUsers.add(token);
+  console.log("📍 Location:", token, lat, lng, acc);
+  res.sendStatus(200);
+});
+
+/* ADMIN FETCH */
 app.get("/get-all-locations", (req, res) => {
   res.json(locations);
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Backend running on http://localhost:${PORT}`));
+/* CLEAN DISCONNECTED USERS */
+setInterval(() => {
+  const now = Date.now();
+  for (const t in locations) {
+    if (now - locations[t].time > 60000) {
+      delete locations[t];
+      activeUsers.delete(t);
+    }
+  }
+}, 15000);
+
+/* START SERVER */
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
