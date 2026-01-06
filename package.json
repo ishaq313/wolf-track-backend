@@ -1,15 +1,13 @@
-
 {
-  "name": "track-him",
+  "name": "wolf-track-backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "backend/server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.19.2",
     "cors": "^2.8.5"
   }
 }
-
