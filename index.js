@@ -53,6 +53,11 @@ app.post("/send-location", (req, res) => {
 
 /* ===== ADMIN FETCH ===== */
 app.get("/admin-data", (req, res) => {
+  const pass = req.headers["x-admin-password"];
+  if (pass !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).send("Unauthorized");
+  }
+
   res.json(state.locations);
 });
 
