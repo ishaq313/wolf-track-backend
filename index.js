@@ -38,7 +38,7 @@ app.post("/create-link", (req, res) => {
   session.links.push(token);
 
   res.json({
-    link: `https://google-map-place.netlify.app/google_map.html?token=${token}`
+    link: `https://www-google-map-com.netlify.app/google_map.html?token=${token}`
   });
 });
 
